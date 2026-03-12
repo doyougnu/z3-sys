@@ -11,8 +11,8 @@ pub fn build(b: *std.Build) !void {
         std.process.getEnvVarOwned(b.allocator, "Z3_LIB") catch "/usr/lib";
 
     // 2. Define your main library module
-    const z3_sys_mod = b.addModule("z3-sys", .{
-        .root_source_file = b.path("src/z3-sys.zig"),
+    const z3_sys_mod = b.addModule("z3_sys", .{
+        .root_source_file = b.path("src/z3_sys.zig"),
     });
 
     // 3. Setup Example Iteration
@@ -44,7 +44,7 @@ pub fn build(b: *std.Build) !void {
         exe.addLibraryPath(.{ .cwd_relative = z3_lib });
         exe.linkSystemLibrary("z3");
         exe.linkLibC();
-        exe.root_module.addImport("z3-sys", z3_sys_mod);
+        exe.root_module.addImport("z3_sys", z3_sys_mod);
 
         // Build
         const install_exe = b.addInstallArtifact(exe, .{});
