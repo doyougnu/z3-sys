@@ -1,5 +1,5 @@
 const std = @import("std");
-const z3 = @import("z3-sys");
+const z3 = @import("z3_sys");
 const Context = z3.Context;
 const Config = z3.Config;
 

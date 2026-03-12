@@ -1,14 +1,19 @@
 const std = @import("std");
 
+pub fn link(b: *std.Build, step: *std.Build.Step.Compile) void {
+    const z3_include = std.process.getEnvVarOwned(b.allocator, "Z3_INCLUDE") catch "/usr/include";
+    const z3_lib = std.process.getEnvVarOwned(b.allocator, "Z3_LIB") catch "/usr/lib";
+
+    step.addIncludePath(.{ .cwd_relative = z3_include });
+    step.addLibraryPath(.{ .cwd_relative = z3_lib });
+
+    step.linkSystemLibrary("z3");
+    step.linkLibC();
+}
+
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-
-    // 1. Z3 Path Resolution
-    const z3_include = b.option([]const u8, "z3-include", "Path to z3 headers") orelse
-        std.process.getEnvVarOwned(b.allocator, "Z3_INCLUDE") catch "/usr/include";
-    const z3_lib = b.option([]const u8, "z3-lib", "Path to z3 lib dir") orelse
-        std.process.getEnvVarOwned(b.allocator, "Z3_LIB") catch "/usr/lib";
 
     // 2. Define your main library module
     const z3_sys_mod = b.addModule("z3_sys", .{
@@ -40,10 +45,7 @@ pub fn build(b: *std.Build) !void {
         });
 
         // Link Z3
-        exe.addIncludePath(.{ .cwd_relative = z3_include });
-        exe.addLibraryPath(.{ .cwd_relative = z3_lib });
-        exe.linkSystemLibrary("z3");
-        exe.linkLibC();
+        link(b, exe);
         exe.root_module.addImport("z3_sys", z3_sys_mod);
 
         // Build
