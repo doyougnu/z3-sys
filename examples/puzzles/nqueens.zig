@@ -3,6 +3,7 @@ const z3 = @import("z3_sys");
 const Context = z3.Context;
 const Config = z3.Config;
 
+// TODO: actually write nqueens or some other minimal test
 pub fn main() !void {
     // Print Z3 version
     const ver = Context.getVersion();
