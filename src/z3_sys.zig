@@ -1080,6 +1080,8 @@ pub const Context = struct {
         z3.Z3_solver_inc_ref(self.raw, s);
         return .{ .raw = s, .ctx = self.raw };
     }
+    // TODO: Add mk_simple_solver and mk_solver_from_tactic
+    // right now we keep this simple
 
     // ---- Optimize ----
     pub fn mkOptimize(self: Context) Optimize {
@@ -1122,7 +1124,7 @@ pub const Sort = struct {
 
 pub const Ast = struct {
     raw: *z3.Z3_ast,
-    ctx: *z3.Z3_context,
+    ctx: *z3.Z3_context, // TODO: should be a const pointer, or not held at all
 
     pub fn toString(self: Ast) ?[*:0]const u8 {
         return z3.Z3_ast_to_string(self.ctx, self.raw);
