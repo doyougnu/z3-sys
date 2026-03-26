@@ -1008,6 +1008,7 @@ pub const Context = struct {
     }
 
     // ---- Sorts ----
+
     pub fn boolSort(self: Context) Sort {
         return .{ .raw = z3.Z3_mk_bool_sort(self.raw).?, .ctx = self.raw };
     }
@@ -1146,6 +1147,30 @@ pub const Ast = struct {
         var args = [2]?*z3.Z3_ast{ self.raw, other.raw };
         return .{ .raw = z3.Z3_mk_and(self.ctx, 2, &args).?, .ctx = self.ctx };
     }
+    // TODO factor out the pattern into a function called doMany
+    pub fn ands(self: Ast, others: []const Ast) Ast {
+        const alloc = std.heap.page_allocator;
+        const ptrs = alloc.alloc(?*z3.Z3_ast, others.len + 1) catch unreachable;
+        defer alloc.free(ptrs);
+        ptrs[0] = self.raw;
+        for (others, 1..) |a, i| ptrs[i] = a.raw;
+        return .{
+            .raw = z3.Z3_mk_and(self.ctx, @intCast(ptrs.len), ptrs.ptr).?,
+            .ctx = self.ctx,
+        };
+    }
+
+    pub fn ors(self: Ast, others: []const Ast) Ast {
+        const alloc = std.heap.page_allocator;
+        const ptrs = alloc.alloc(?*z3.Z3_ast, others.len + 1) catch unreachable;
+        defer alloc.free(ptrs);
+        ptrs[0] = self.raw;
+        for (others, 1..) |a, i| ptrs[i] = a.raw;
+        return .{
+            .raw = z3.Z3_mk_or(self.ctx, @intCast(ptrs.len), ptrs.ptr).?,
+            .ctx = self.ctx,
+        };
+    }
     pub fn @"or"(self: Ast, other: Ast) Ast {
         var args = [2]?*z3.Z3_ast{ self.raw, other.raw };
         return .{ .raw = z3.Z3_mk_or(self.ctx, 2, &args).?, .ctx = self.ctx };
@@ -1165,13 +1190,43 @@ pub const Ast = struct {
         var args = [2]?*z3.Z3_ast{ self.raw, other.raw };
         return .{ .raw = z3.Z3_mk_add(self.ctx, 2, &args).?, .ctx = self.ctx };
     }
+    pub fn adds(self: Ast, others: []const Ast) Ast {
+        const alloc = std.heap.page_allocator;
+        const ptrs = alloc.alloc(?*z3.Z3_ast, others.len + 1) catch unreachable;
+        defer alloc.free(ptrs);
+        ptrs[0] = self.raw;
+        for (others, 1..) |a, i| ptrs[i] = a.raw;
+        return .{ .raw = z3.Z3_mk_add(self.ctx, @intCast(ptrs.len), ptrs.ptr).?, .ctx = self.ctx };
+    }
     pub fn sub(self: Ast, other: Ast) Ast {
         var args = [2]?*z3.Z3_ast{ self.raw, other.raw };
         return .{ .raw = z3.Z3_mk_sub(self.ctx, 2, &args).?, .ctx = self.ctx };
     }
+    pub fn subs(self: Ast, others: []const Ast) Ast {
+        const alloc = std.heap.page_allocator;
+        const ptrs = alloc.alloc(?*z3.Z3_ast, others.len + 1) catch unreachable;
+        defer alloc.free(ptrs);
+        ptrs[0] = self.raw;
+        for (others, 1..) |a, i| ptrs[i] = a.raw;
+        return .{
+            .raw = z3.Z3_mk_sub(self.ctx, @intCast(ptrs.len), ptrs.ptr).?,
+            .ctx = self.ctx,
+        };
+    }
     pub fn mul(self: Ast, other: Ast) Ast {
         var args = [2]?*z3.Z3_ast{ self.raw, other.raw };
         return .{ .raw = z3.Z3_mk_mul(self.ctx, 2, &args).?, .ctx = self.ctx };
+    }
+    pub fn muls(self: Ast, others: []const Ast) Ast {
+        const alloc = std.heap.page_allocator;
+        const ptrs = alloc.alloc(?*z3.Z3_ast, others.len + 1) catch unreachable;
+        defer alloc.free(ptrs);
+        ptrs[0] = self.raw;
+        for (others, 1..) |a, i| ptrs[i] = a.raw;
+        return .{
+            .raw = z3.Z3_mk_mul(self.ctx, @intCast(ptrs.len), ptrs.ptr).?,
+            .ctx = self.ctx,
+        };
     }
     pub fn div(self: Ast, other: Ast) Ast {
         return .{ .raw = z3.Z3_mk_div(self.ctx, self.raw, other.raw).?, .ctx = self.ctx };
